@@ -34,6 +34,7 @@ namespace COM3D2.EditBodyLoadFix {
 			yield return new WaitForSeconds(0.5f);
 			ResetPose();
 			ResetParts(maid);
+			ResetCustomPartsEdit(maid);
 		}
 
 		static void ResetPose() {
@@ -50,6 +51,11 @@ namespace COM3D2.EditBodyLoadFix {
 					maid.body0.BoneMorph_FromProcItem(maidProp.name, maidProp.value / 100f);
 				}
 			}
+		}
+
+		static void ResetCustomPartsEdit(Maid maid) {
+			AccessTools.Field(typeof(CustomPartsWindow), "animation")
+				.SetValue(SceneEdit.Instance.customPartsWindow, maid.GetAnimation());
 		}
 
 		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", typeof(Maid), typeof(CharacterMgr.Preset))]
