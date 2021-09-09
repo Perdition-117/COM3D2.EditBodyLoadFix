@@ -54,8 +54,7 @@ namespace COM3D2.EditBodyLoadFix {
 		}
 
 		static void ResetCustomPartsEdit(Maid maid) {
-			AccessTools.Field(typeof(CustomPartsWindow), "animation")
-				.SetValue(SceneEdit.Instance.customPartsWindow, maid.GetAnimation());
+			SceneEdit.Instance.customPartsWindow.animation = maid.GetAnimation();
 		}
 
 		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", typeof(Maid), typeof(CharacterMgr.Preset))]
