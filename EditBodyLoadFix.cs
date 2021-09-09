@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
@@ -35,6 +36,7 @@ namespace COM3D2.EditBodyLoadFix {
 			ResetPose();
 			ResetParts(maid);
 			ResetCustomPartsEdit(maid);
+			ResetTouchJump(maid);
 		}
 
 		static void ResetPose() {
@@ -55,6 +57,58 @@ namespace COM3D2.EditBodyLoadFix {
 
 		static void ResetCustomPartsEdit(Maid maid) {
 			SceneEdit.Instance.customPartsWindow.animation = maid.GetAnimation();
+		}
+
+		static void ResetTouchJump(Maid maid) {
+			var maidColliderCollect = MaidColliderCollect.AddColliderCollect(maid);
+
+			var sceneEdit = SceneEdit.Instance;
+
+			// Also resets VR grabbing
+			var touchJumpColliderList = maidColliderCollect.AddCollider(MaidColliderCollect.ColliderType.Grab);
+
+			if (GameMain.Instance.VRMode) {
+				touchJumpColliderList.Clear();
+			} else {
+				var boneDictionary = IKManager.CreateBoneDic(maid);
+
+				var transformToTouchType = new Dictionary<Transform, SceneEdit.TouchType> {
+					[boneDictionary[IKManager.BoneType.Head].Value.transform] = SceneEdit.TouchType.Head,
+					[boneDictionary[IKManager.BoneType.Spine1].Value.transform] = SceneEdit.TouchType.UpperBody,
+					[boneDictionary[IKManager.BoneType.Bust_R].Value.transform] = SceneEdit.TouchType.Bust,
+					[boneDictionary[IKManager.BoneType.Bust_L].Value.transform] = SceneEdit.TouchType.Bust,
+					[boneDictionary[IKManager.BoneType.Pelvis].Value.transform] = SceneEdit.TouchType.LowerBody,
+					[boneDictionary[IKManager.BoneType.Thigh_L].Value.transform] = SceneEdit.TouchType.Leg,
+					[boneDictionary[IKManager.BoneType.Thigh_R].Value.transform] = SceneEdit.TouchType.Leg,
+				};
+
+				var touchTypeToCallback = new Dictionary<SceneEdit.TouchType, Action> {
+					[SceneEdit.TouchType.Head] = () => sceneEdit.OnTouchJump(SceneEdit.TouchType.Head),
+					[SceneEdit.TouchType.Bust] = () => sceneEdit.OnTouchJump(SceneEdit.TouchType.Bust),
+					[SceneEdit.TouchType.UpperBody] = () => sceneEdit.OnTouchJump(SceneEdit.TouchType.UpperBody),
+					[SceneEdit.TouchType.LowerBody] = () => sceneEdit.OnTouchJump(SceneEdit.TouchType.LowerBody),
+					[SceneEdit.TouchType.Leg] = () => sceneEdit.OnTouchJump(SceneEdit.TouchType.Leg),
+				};
+
+				foreach (var collider in touchJumpColliderList) {
+					var colliderEvent = collider.gameObject.AddComponent<ColliderEvent>();
+					var transform = colliderEvent.transform;
+
+					while (transform != null && !transformToTouchType.ContainsKey(transform)) {
+						transform = transform.parent;
+					}
+
+					if (transform == null) {
+						continue;
+					}
+
+					var touchType = transformToTouchType[transform];
+					colliderEvent.onMouseDown = touchTypeToCallback[touchType];
+				}
+			}
+
+			sceneEdit.touchJumpColliderList = touchJumpColliderList;
+			sceneEdit.m_bUseTouchJump = sceneEdit.m_bUseTouchJump;
 		}
 
 		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", typeof(Maid), typeof(CharacterMgr.Preset))]
