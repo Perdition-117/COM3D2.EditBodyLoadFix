@@ -39,11 +39,13 @@ namespace COM3D2.EditBodyLoadFix {
 			ResetTouchJump(maid);
 		}
 
+		// fixes motorbike pose
 		static void ResetPose() {
 			var itemData = PoseIconData.GetItemData(SceneEdit.Instance.pauseIconWindow.selectedIconId);
 			itemData.ExecScript();
 		}
 
+		// fixes rigid breasts
 		static void ResetParts(Maid maid) {
 			foreach (var mpn in FixMpns) {
 				var maidProp = maid.GetProp(mpn);
@@ -55,10 +57,12 @@ namespace COM3D2.EditBodyLoadFix {
 			}
 		}
 
+		// fixes maid animation not freezing when placing accessories
 		static void ResetCustomPartsEdit(Maid maid) {
 			SceneEdit.Instance.customPartsWindow.animation = maid.GetAnimation();
 		}
 
+		// fixes touch jump and VR grabbing
 		static void ResetTouchJump(Maid maid) {
 			var maidColliderCollect = MaidColliderCollect.AddColliderCollect(maid);
 
@@ -111,6 +115,7 @@ namespace COM3D2.EditBodyLoadFix {
 			sceneEdit.m_bUseTouchJump = sceneEdit.m_bUseTouchJump;
 		}
 
+		// loads custom bodies from presets
 		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", typeof(Maid), typeof(CharacterMgr.Preset))]
 		[HarmonyPostfix]
 		static void PostPresetSet(Maid f_maid, CharacterMgr.Preset f_prest) {
