@@ -2,10 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
+    <LangVersion>10</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RepositoryUrl>https://github.com/Perdition-51/COM3D2.EditBodyLoadFix</RepositoryUrl>
-    <Authors>Perdition</Authors>
+    <Product>EditBodyLoadFix</Product>
     <Version>1.1.0</Version>
+    <Authors>Perdition</Authors>
+    <PackageProjectUrl>https://github.com/Perdition-117/COM3D2.EditBodyLoadFix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Perdition-117/COM3D2.EditBodyLoadFix.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
