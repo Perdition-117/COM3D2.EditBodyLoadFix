@@ -122,7 +122,7 @@ class EditBodyLoadFix : BaseUnityPlugin {
 	static void PostPresetSet(Maid f_maid, CharacterMgr.Preset f_prest) {
 		if (f_prest.ePreType == CharacterMgr.PresetType.Body || f_prest.ePreType == CharacterMgr.PresetType.All) {
 			var maidProp = f_prest.listMprop.Find(e => e.idx == (int)MPN.body);
-			if (IsEnableMenu(maidProp.strFileName)) {
+			if (maidProp != null && IsEnableMenu(maidProp.strFileName)) {
 				f_maid.SetProp((MPN)maidProp.idx, maidProp.strFileName, maidProp.nFileNameRID, false, false);
 			}
 		}
