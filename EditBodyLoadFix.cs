@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.EditBodyLoadFix;
 
-[BepInPlugin("net.perdition.com3d2.editbodyloadfix", "EditBodyLoadFix", "1.0.0")]
+[BepInPlugin("net.perdition.com3d2.editbodyloadfix", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 class EditBodyLoadFix : BaseUnityPlugin {
 	static readonly MPN[] FixMpns = new MPN[] {
 		MPN.MuneL,

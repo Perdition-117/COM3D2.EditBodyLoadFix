@@ -5,28 +5,18 @@
     <LangVersion>10</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Product>EditBodyLoadFix</Product>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <Authors>Perdition</Authors>
     <PackageProjectUrl>https://github.com/Perdition-117/COM3D2.EditBodyLoadFix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Perdition-117/COM3D2.EditBodyLoadFix.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>Libs\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>Libs\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>Libs\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>Libs\BepInEx.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>Libs\UnityEngine.dll</HintPath>
-    </Reference>
+    <PackageReference Include="BepInEx.BaseLib" Version="5.4.19" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.1.0" />
+    <PackageReference Include="COM3D2.GameLibs" Version="2.13.0-r.0" />
+    <PackageReference Include="HarmonyX" Version="2.10.0" />
+    <PackageReference Include="UnityEngine" Version="5.6.1" />
   </ItemGroup>
 
 </Project>
