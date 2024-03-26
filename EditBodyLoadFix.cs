@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using BepInEx;
 using HarmonyLib;
 using SceneEditWindow;
@@ -117,8 +118,22 @@ class EditBodyLoadFix : BaseUnityPlugin {
 	}
 
 	// loads custom bodies from presets
-	[HarmonyPatch(typeof(CharacterMgr), "PresetSet", typeof(Maid), typeof(CharacterMgr.Preset))]
-	[HarmonyPostfix]
+	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
+	[HarmonyTranspiler]
+	static IEnumerable<CodeInstruction> PresetSetTranspiler(IEnumerable<CodeInstruction> instructions) {
+		return new CodeMatcher(instructions)
+			.End()
+			.MatchStartBackwards(
+				new CodeMatch(OpCodes.Ldarg_1),
+				new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Maid), nameof(Maid.AllProcPropSeqStart))))
+			.Advance(1)
+			.Insert(
+				new CodeInstruction(OpCodes.Ldarg_1),
+				new CodeInstruction(OpCodes.Ldarg_2),
+				new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(EditBodyLoadFix), nameof(PostPresetSet))))
+			.InstructionEnumeration();
+	}
+
 	static void PostPresetSet(Maid f_maid, CharacterMgr.Preset f_prest) {
 		if (f_prest.ePreType == CharacterMgr.PresetType.Body || f_prest.ePreType == CharacterMgr.PresetType.All) {
 			var maidProp = f_prest.listMprop.Find(e => e.idx == (int)MPN.body);
