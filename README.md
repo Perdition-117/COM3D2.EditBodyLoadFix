@@ -13,7 +13,3 @@ Fixes various issues relating to use of custom bodies in edit mode.
 ## Installing
 
 Get the latest version from [the release page](../../releases/latest). Extract the archive and place `COM3D2.EditBodyLoadFix.dll` in `BepInEx\plugins`.
-
-## Building
-
-A publicized version of `Assembly-CSharp.dll` is required.

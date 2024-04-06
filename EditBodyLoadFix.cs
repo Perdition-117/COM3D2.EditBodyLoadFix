@@ -12,7 +12,7 @@ namespace COM3D2.EditBodyLoadFix;
 
 [BepInPlugin("net.perdition.com3d2.editbodyloadfix", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 class EditBodyLoadFix : BaseUnityPlugin {
-	static readonly MPN[] FixMpns = new MPN[] {
+	private static readonly MPN[] FixMpns = new MPN[] {
 		MPN.MuneL,
 		MPN.MuneS,
 		MPN.MuneTare,
@@ -21,19 +21,19 @@ class EditBodyLoadFix : BaseUnityPlugin {
 		MPN.MuneYawaraka,
 	};
 
-	void Awake() {
+	private void Awake() {
 		Harmony.CreateAndPatchAll(typeof(EditBodyLoadFix));
 	}
 
-	[HarmonyPatch(typeof(Maid), "SetProp", typeof(MaidProp), typeof(string), typeof(int), typeof(bool), typeof(bool))]
+	[HarmonyPatch(typeof(Maid), nameof(Maid.SetProp), typeof(MaidProp), typeof(string), typeof(int), typeof(bool), typeof(bool))]
 	[HarmonyPostfix]
-	static void PostSetProp(Maid __instance, MaidProp mp) {
+	private static void PostSetProp(Maid __instance, MaidProp mp) {
 		if ((MPN)mp.idx == MPN.body && SceneManager.GetActiveScene().name == "SceneEdit") {
 			__instance.StartCoroutine(ResetBody(__instance));
 		}
 	}
 
-	static IEnumerator ResetBody(Maid maid) {
+	private static IEnumerator ResetBody(Maid maid) {
 		yield return new WaitForSeconds(0.5f);
 		ResetPose();
 		ResetParts(maid);
@@ -42,13 +42,13 @@ class EditBodyLoadFix : BaseUnityPlugin {
 	}
 
 	// fixes motorbike pose
-	static void ResetPose() {
+	private static void ResetPose() {
 		var itemData = PoseIconData.GetItemData(SceneEdit.Instance.pauseIconWindow.selectedIconId);
 		itemData.ExecScript();
 	}
 
 	// fixes rigid breasts
-	static void ResetParts(Maid maid) {
+	private static void ResetParts(Maid maid) {
 		foreach (var mpn in FixMpns) {
 			var maidProp = maid.GetProp(mpn);
 			if (maidProp.type == 1) {
@@ -60,12 +60,12 @@ class EditBodyLoadFix : BaseUnityPlugin {
 	}
 
 	// fixes maid animation not freezing when placing accessories
-	static void ResetCustomPartsEdit(Maid maid) {
+	private static void ResetCustomPartsEdit(Maid maid) {
 		SceneEdit.Instance.customPartsWindow.animation = maid.GetAnimation();
 	}
 
 	// fixes touch jump and VR grabbing
-	static void ResetTouchJump(Maid maid) {
+	private static void ResetTouchJump(Maid maid) {
 		var maidColliderCollect = MaidColliderCollect.AddColliderCollect(maid);
 
 		var sceneEdit = SceneEdit.Instance;
@@ -120,7 +120,7 @@ class EditBodyLoadFix : BaseUnityPlugin {
 	// loads custom bodies from presets
 	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
 	[HarmonyTranspiler]
-	static IEnumerable<CodeInstruction> PresetSetTranspiler(IEnumerable<CodeInstruction> instructions) {
+	private static IEnumerable<CodeInstruction> PresetSetTranspiler(IEnumerable<CodeInstruction> instructions) {
 		return new CodeMatcher(instructions)
 			.End()
 			.MatchStartBackwards(
@@ -134,7 +134,7 @@ class EditBodyLoadFix : BaseUnityPlugin {
 			.InstructionEnumeration();
 	}
 
-	static void PostPresetSet(Maid f_maid, CharacterMgr.Preset f_prest) {
+	private static void PostPresetSet(Maid f_maid, CharacterMgr.Preset f_prest) {
 		if (f_prest.ePreType == CharacterMgr.PresetType.Body || f_prest.ePreType == CharacterMgr.PresetType.All) {
 			var maidProp = f_prest.listMprop.Find(e => e.idx == (int)MPN.body);
 			if (maidProp != null && IsEnableMenu(maidProp.strFileName)) {
@@ -143,7 +143,7 @@ class EditBodyLoadFix : BaseUnityPlugin {
 		}
 	}
 
-	static bool IsEnableMenu(string f_strFileName) {
+	private static bool IsEnableMenu(string f_strFileName) {
 		if (CharacterMgr.EditModeLookHaveItem) {
 			return GameMain.Instance.CharacterMgr.status.IsHavePartsItem(f_strFileName) && GameUty.IsExistFile(f_strFileName, null);
 		}
