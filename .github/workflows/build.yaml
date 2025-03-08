@@ -8,37 +8,34 @@ on:
 env:
   DOTNET_VERSION: '6.0.x' # The .NET SDK version to use
   DOTNET_CLI_TELEMETRY_OPTOUT: false
-  OUTPUT_NAME: COM3D2.EditBodyLoadFix
+  OUTPUT_NAME: ${{ github.event.repository.name }}
 
 jobs:
   build:
 
-    runs-on: windows-2019
+    runs-on: windows-2022
+
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        dotnet-quality: ga
+      uses: actions/checkout@v4
 
     - name: Install dependencies
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore --output build
+      run: dotnet build --configuration Release --no-restore --property:OutputPath=build
 
-    - name: Create the package
+    - name: Create package
       run: |
         $archiveName = "$env:OUTPUT_NAME-$env:GITHUB_REF_NAME.zip"
         Add-Content -Value "ARCHIVE_NAME=$archiveName" -Path $env:GITHUB_ENV
         Compress-Archive -DestinationPath $archiveName -Path src\build\$env:OUTPUT_NAME.dll
 
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         fail_on_unmatched_files: true
         files: ${{ env.ARCHIVE_NAME }}
