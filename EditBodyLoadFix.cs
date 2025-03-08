@@ -12,23 +12,28 @@ namespace COM3D2.EditBodyLoadFix;
 
 [BepInPlugin("net.perdition.com3d2.editbodyloadfix", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 class EditBodyLoadFix : BaseUnityPlugin {
-	private static readonly MPN[] FixMpns = new MPN[] {
-		MPN.MuneL,
-		MPN.MuneS,
-		MPN.MuneTare,
-		MPN.MuneUpDown,
-		MPN.MuneYori,
-		MPN.MuneYawaraka,
+	private static readonly MPN[] FixMpns = {
+		Mpn.MuneL,
+		Mpn.MuneS,
+		Mpn.MuneTare,
+		Mpn.MuneUpDown,
+		Mpn.MuneYori,
+		Mpn.MuneYawaraka,
+		Mpn.EyeBallPosY,
+		Mpn.EyeBallSclX,
+		Mpn.EyeBallSclY,
 	};
 
 	private void Awake() {
+		var version = new Version(GameUty.GetBuildVersionText());
 		Harmony.CreateAndPatchAll(typeof(EditBodyLoadFix));
+		Harmony.CreateAndPatchAll(version.Major >= 3 ? typeof(EditBodyLoadFix30) : typeof(EditBodyLoadFix20));
 	}
 
 	[HarmonyPatch(typeof(Maid), nameof(Maid.SetProp), typeof(MaidProp), typeof(string), typeof(int), typeof(bool), typeof(bool))]
 	[HarmonyPostfix]
 	private static void PostSetProp(Maid __instance, MaidProp mp) {
-		if ((MPN)mp.idx == MPN.body && SceneManager.GetActiveScene().name == "SceneEdit") {
+		if ((MPN)mp.idx == Mpn.body && SceneManager.GetActiveScene().name == "SceneEdit") {
 			__instance.StartCoroutine(ResetBody(__instance));
 		}
 	}
@@ -47,7 +52,7 @@ class EditBodyLoadFix : BaseUnityPlugin {
 		itemData.ExecScript();
 	}
 
-	// fixes rigid breasts
+	// fixes pupil parameters and rigid breasts
 	private static void ResetParts(Maid maid) {
 		foreach (var mpn in FixMpns) {
 			var maidProp = maid.GetProp(mpn);
@@ -118,8 +123,6 @@ class EditBodyLoadFix : BaseUnityPlugin {
 	}
 
 	// loads custom bodies from presets
-	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
-	[HarmonyTranspiler]
 	private static IEnumerable<CodeInstruction> PresetSetTranspiler(IEnumerable<CodeInstruction> instructions) {
 		return new CodeMatcher(instructions)
 			.End()
@@ -134,19 +137,24 @@ class EditBodyLoadFix : BaseUnityPlugin {
 			.InstructionEnumeration();
 	}
 
+	class EditBodyLoadFix30 {
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset), typeof(bool))]
+		private static IEnumerable<CodeInstruction> PresetSetTranspiler(IEnumerable<CodeInstruction> instructions) => EditBodyLoadFix.PresetSetTranspiler(instructions);
+	}
+
+	class EditBodyLoadFix20 {
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
+		private static IEnumerable<CodeInstruction> PresetSetTranspiler(IEnumerable<CodeInstruction> instructions) => EditBodyLoadFix.PresetSetTranspiler(instructions);
+	}
+
 	private static void PostPresetSet(Maid f_maid, CharacterMgr.Preset f_prest) {
 		if (f_prest.ePreType == CharacterMgr.PresetType.Body || f_prest.ePreType == CharacterMgr.PresetType.All) {
-			var maidProp = f_prest.listMprop.Find(e => e.idx == (int)MPN.body);
-			if (maidProp != null && IsEnableMenu(maidProp.strFileName)) {
+			var maidProp = f_prest.listMprop.Find(e => e.idx == (int)Mpn.body);
+			if (maidProp != null && GameMain.Instance.CharacterMgr.IsEnableMenu(maidProp.strFileName)) {
 				f_maid.SetProp((MPN)maidProp.idx, maidProp.strFileName, maidProp.nFileNameRID, false, false);
 			}
 		}
-	}
-
-	private static bool IsEnableMenu(string f_strFileName) {
-		if (CharacterMgr.EditModeLookHaveItem) {
-			return GameMain.Instance.CharacterMgr.status.IsHavePartsItem(f_strFileName) && GameUty.IsExistFile(f_strFileName, null);
-		}
-		return GameUty.IsExistFile(f_strFileName, null);
 	}
 }
