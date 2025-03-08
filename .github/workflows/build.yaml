@@ -35,7 +35,7 @@ jobs:
       run: |
         $archiveName = "$env:OUTPUT_NAME-$env:GITHUB_REF_NAME.zip"
         Add-Content -Value "ARCHIVE_NAME=$archiveName" -Path $env:GITHUB_ENV
-        Compress-Archive -DestinationPath $archiveName -Path build\$env:OUTPUT_NAME.dll
+        Compress-Archive -DestinationPath $archiveName -Path src\build\$env:OUTPUT_NAME.dll
 
     - name: Release
       uses: softprops/action-gh-release@v1
