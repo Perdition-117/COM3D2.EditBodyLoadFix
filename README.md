@@ -6,10 +6,11 @@ Fixes various issues relating to use of custom bodies in edit mode.
 - When switching body:
   - Restores selected pose
   - Fixes breasts going rigid
+  - Fixes pupil parameters (3.0)
   - Fixes animation not freezing when placing accessories
   - Fixes touch jump not working
   - Fixes VR grabbing not working
 
 ## Installing
 
-Get the latest version from [the release page](../../releases/latest). Extract the archive and place `COM3D2.EditBodyLoadFix.dll` in `BepInEx\plugins`.
+Download the latest version from [the release page](../../releases/latest). Extract the archive contents into `BepInEx\plugins`.
